@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: Qwerty1234!
+      MYSQL_DATABASE: TestTask
+      MYSQL_USER: user
+      MYSQL_PASSWORD: Qwerty1234!
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["npm", "run", "migrations"]
+    environment:
+      DB_HOST: db
+      DB_USER: user
+      DB_PASSWORD: Qwerty1234!
+      DB_NAME: TestTask
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
