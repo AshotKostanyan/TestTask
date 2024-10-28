@@ -22,7 +22,6 @@ Create an API that:
    ```bash
    docker compose up
 
-
 ## API Documentation
 
 ### POST /generate
@@ -48,5 +47,3 @@ This endpoint generates valid combinations based on the provided items and combi
         ["B1", "C1"], ["B2", "C1"]
       ]
   }
-
-
