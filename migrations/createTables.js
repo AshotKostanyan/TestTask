@@ -1,14 +1,12 @@
-import mysql from 'mysql2';
+const mysql = require('mysql2');
 require('dotenv').config();
 
-const connection = null;
-await setTimeout(
-    connection = mysql.createConnection({
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD
-    })
-, 20000);
+
+const connection = mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD
+})
 
 
 connection.connect((err) => {
@@ -19,20 +17,20 @@ connection.connect((err) => {
     console.log('Connected to MySQL server.');
 
     const createDatabase = `
-        CREATE DATABASE IF NOT EXISTS rererer;
+        CREATE DATABASE IF NOT EXISTS TestTask;
     `;
 
     connection.query(createDatabase, (err, results) => {
         if (err) {
             console.error('Error creating database:', err);
-            return connection.end(); // Close connection on error
+            return connection.end();
         }
         console.log('Database "TestTask" created or already exists.');
 
         connection.query('USE TestTask;', (err) => {
             if (err) {
                 console.error('Error selecting database:', err);
-                return connection.end(); // Close connection on error
+                return connection.end();
             }
 
             const createItemsTable = `
@@ -56,7 +54,6 @@ connection.connect((err) => {
                 );
             `;
 
-            // Create tables in sequence
             connection.query(createItemsTable, (err, results) => {
                 if (err) {
                     console.error('Error creating items table:', err);
@@ -78,7 +75,6 @@ connection.connect((err) => {
                             console.log('Responses table created successfully.');
                         }
 
-                        // Close the connection after all queries are done
                         connection.end((err) => {
                             if (err) {
                                 console.error('Error closing the connection:', err);

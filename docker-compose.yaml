@@ -19,7 +19,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["npm", "run", "migrations"]
+    command: ["npm", "run", "start", "&&", "npm", "run", "migrations"]
     environment:
       DB_HOST: db
       DB_USER: user
