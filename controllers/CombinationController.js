@@ -8,20 +8,28 @@ class CombinationsController {
     static async getCombinations(req, res) {
         const { array, length } = req.body;
 
-        const labels = CombinationsController.generateLabels(array);
-        const results = CombinationsController.generateCombinations(labels, length);
 
+        // After obtaining the array and the combination length, I created combinations using the array indexes with the specified length.
+        // Then, using those index combinations, I generated item combinations by utilizing all items corresponding to each index.
+        // Using this algorithm, I ensured that elements of the same type do not repeat in the combinations.
+        
+        const elements = CombinationsController.transformArray(array);
+        const indexCombinations = CombinationsController.generateIndexCombinations(array.length, length);
+        const result = CombinationsController.getAllCombinations(elements, indexCombinations).reduce((acc, curr) => acc.concat(curr), []);
+        const labels = elements.reduce((acc, curr) => acc.concat(curr), []);
+        // I call reduce function for array formating
+
+        
         const connection = await mysql.createConnection(dbConfig);
 
         try {
             await connection.beginTransaction();
-            console.log(labels);
             
             await ItemService.storeItems(labels, connection);
-            const combinationId = await CombinationService.storeCombination(results, connection);
+            const combinationId = await CombinationService.storeCombination(result, connection);
             const response = {
                 id: combinationId,
-                combination: results
+                combination: result
             };
 
             await ResponseService.storeResponse(response, connection);
@@ -48,18 +56,18 @@ class CombinationsController {
         return labels;
     }
 
-    static generateCombinations(labels, length) {
+    static generateIndexCombinations(maxNumber, length) {
+        const array = Array.from({ length: maxNumber }, (_, i) => i);
         const results = [];
+
         const createCombination = (start, combination) => {
             if (combination.length === length) {
-                if (CombinationsController.isValidCombination(combination)) {
-                    results.push([...combination]);
-                }
+                results.push([...combination]);
                 return;
             }
 
-            for (let i = start; i < labels.length; i++) {
-                combination.push(labels[i]);
+            for (let i = start; i < array.length; i++) {
+                combination.push(array[i]);
                 createCombination(i + 1, combination);
                 combination.pop();
             }
@@ -69,19 +77,55 @@ class CombinationsController {
         return results;
     }
 
-    static isValidCombination(combination) {
-        let lastChar = null;
-        for (let i = 0; i < combination.length; i++) {
-            const currentChar = combination[i][0];
-            if (currentChar === lastChar) {
-                return false;
+    static transformArray(arr) {
+        const result = [];
+        
+        for (let i = 0; i < arr.length; i++) {
+            const num = arr[i];
+            const letter = String.fromCharCode(65 + i);
+            const subArray = [];
+            
+            for (let i = 1; i <= num; i++) {
+              subArray.push(`${letter}${i}`);
             }
-            lastChar = currentChar;
-            if (i < combination.length - 1 && combination[i][0] === combination[i + 1][0]) {
-                return false;
-            }
+            
+            result.push(subArray);
         }
-        return true;
+        
+        return result;
+    }
+
+    static getAllCombinations(elements, indexes) {
+        const results = [];
+      
+        for (let comboIndex = 0; comboIndex < indexes.length; comboIndex++) {
+          const indexCombo = indexes[comboIndex];
+          const combinations = [];
+      
+          function backtrack(temp, depth) {
+            if (depth === indexCombo.length) {
+              combinations.push([...temp]);
+              return;
+            }
+      
+            const currentArray = elements[indexCombo[depth]];
+            if (!currentArray) {
+              console.error(`Invalid access at depth ${depth}: Index ${indexCombo[depth]} is undefined.`);
+              return;
+            }
+      
+            for (let i = 0; i < currentArray.length; i++) {
+              temp.push(currentArray[i]);
+              backtrack(temp, depth + 1);
+              temp.pop();
+            }
+          }
+      
+          backtrack([], 0);
+          results.push(combinations);
+        }
+      
+        return results;
     }
 }
 
