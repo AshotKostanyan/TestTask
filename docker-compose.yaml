@@ -4,10 +4,10 @@ services:
   db:
     image: mysql:8
     environment:
-      MYSQL_ROOT_PASSWORD: Qwerty1234!
-      MYSQL_DATABASE: TestTask
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: user
-      MYSQL_PASSWORD: Qwerty1234!
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
     healthcheck:
@@ -19,12 +19,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["npm", "run", "start", "&&", "npm", "run", "migrations"]
+    command: ["sh", "-c", "npm run migrations && npm run start"]
     environment:
       DB_HOST: db
       DB_USER: user
-      DB_PASSWORD: Qwerty1234!
-      DB_NAME: TestTask
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
     ports:
       - "3000:3000"
     depends_on:
