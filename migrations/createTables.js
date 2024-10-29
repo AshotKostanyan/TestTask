@@ -17,7 +17,7 @@ connection.connect((err) => {
     console.log('Connected to MySQL server.');
 
     const createDatabase = `
-        CREATE DATABASE IF NOT EXISTS TestTask;
+        CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME};
     `;
 
     connection.query(createDatabase, (err, results) => {

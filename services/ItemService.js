@@ -7,7 +7,7 @@ class ItemService {
         for (const name of itemNames) {
             console.log(name);
             
-            const existingItem = await Item.findByName(name, connection);
+            const existingItem = await Item.findByName(name);
             if (existingItem) {
                 storedItemIds.push(existingItem.id);
             } else {
